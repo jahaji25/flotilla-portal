@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Admin | Commander Flotilla West</title><link rel="stylesheet" href="styles.css"></head>
+<body class="admin-body">
+<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">⚓</span><span><strong>COMMANDER FLOTILLA WEST</strong><small>ADMINISTRATION</small></span></a><a class="back-link" href="index.html">← View website</a></header>
+<main class="admin-main">
+  <section class="admin-intro"><p class="eyebrow">CONTENT MANAGEMENT</p><h1>Website Admin</h1><p>Sign in to manage the public section cards.</p></section>
+  <section id="setupWarning" class="notice hidden"><div class="notice-icon">!</div><div><strong>Setup required</strong><p>Add your Supabase project URL and public anon key to <code>config.js</code>, then run <code>schema.sql</code> in Supabase SQL Editor. Instructions are in README.md.</p></div></section>
+  <section id="authPanel" class="panel">
+    <h2>Administrator sign in</h2><form id="loginForm"><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Password<input id="password" type="password" autocomplete="current-password" required></label><button class="primary-btn" type="submit">Sign in</button><p id="authMessage" class="form-message" role="status"></p></form>
+  </section>
+  <section id="editorPanel" class="panel hidden">
+    <div class="panel-heading"><div><p class="eyebrow">PUBLISHED CONTENT</p><h2>Manage homepage sections</h2></div><button id="logoutBtn" class="secondary-btn">Sign out</button></div>
+    <p class="muted">Create or edit section cards shown on the public homepage. This initial version does not yet manage nested dropdowns or uploaded media.</p>
+    <form id="contentForm" class="content-form"><input type="hidden" id="itemId"><label>Section title<input id="itemTitle" required maxlength="100" placeholder="e.g. General Information"></label><label>Section key<input id="itemSlug" required maxlength="100" placeholder="e.g. general-information"></label><label>Short description<textarea id="itemDescription" required rows="3" maxlength="500" placeholder="Brief public description"></textarea></label><label>Icon (emoji)<input id="itemIcon" maxlength="8" placeholder="⚓"></label><label>Display order<input id="itemOrder" type="number" value="1" min="1" required></label><label class="check-label"><input id="itemPublished" type="checkbox" checked> Published on homepage</label><button class="primary-btn" type="submit">Save section</button><button id="cancelEdit" class="secondary-btn hidden" type="button">Cancel edit</button><p id="saveMessage" class="form-message" role="status"></p></form>
+    <div id="contentList" class="content-list"></div>
+  </section>
+</main><footer><span>Admin access is restricted by Supabase authentication and database policies.</span><a href="index.html">Public website</a></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="admin.js"></script>
+</body></html>

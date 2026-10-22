@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Flotilla information portal">
+  <title>Commander Flotilla West | Information Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html"><span class="brand-mark">⚓</span><span><strong>COMMANDER FLOTILLA WEST</strong><small>INFORMATION PORTAL</small></span></a>
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu">☰</button>
+  <nav id="mainNav" aria-label="Main navigation">
+    <a href="#operations">Operations</a><a href="#general-information">General Information</a>
+    <a href="#organization">Organization</a><a href="#ships-crafts">Ships / Crafts</a>
+    <a href="#gallery">Gallery</a><a href="#weather">Weather</a><a href="#events">Events</a>
+    <a class="watch" href="#watch-online">Watch Online</a>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy"><p class="eyebrow">INFORMATION • ORGANIZATION • COMMUNITY</p>
+      <h1>Welcome to<br><span>Commander Flotilla West</span></h1>
+      <p class="hero-text">A central place for approved public information, announcements, reference pages and gallery content.</p>
+      <a class="primary-btn" href="#general-information">Explore information <span>→</span></a>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="wave wave1"></div><div class="wave wave2"></div><div class="ship-silhouette">⚓</div><div class="art-caption">FLOTILLA WEST <span>•</span> INFORMATION PORTAL</div></div>
+  </section>
+  <section class="section intro"><div><p class="eyebrow">PORTAL OVERVIEW</p><h2>Information, organized.</h2></div><p>Use the navigation above to browse sections. This starter version uses sample content; an administrator can publish approved updates after the database is configured.</p></section>
+  <section class="cards" id="sectionCards"></section>
+  <section class="notice"><div class="notice-icon">ⓘ</div><div><strong>Demo website</strong><p>This is a starter template. Replace sample content with information you are authorized to publish.</p></div></section>
+</main>
+<footer><a class="footer-brand" href="#">⚓ COMMANDER FLOTILLA WEST</a><span>© <span id="year"></span> Information Portal</span><a href="admin.html">Admin login</a></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html>
