@@ -1,0 +1,63 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visual Website Builder</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="builder.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">⚓</span>
+      <span>
+        <strong>COMMANDER FLOTILLA WEST</strong>
+        <small>VISUAL WEBSITE BUILDER</small>
+      </span>
+    </a>
+    <div class="builder-actions">
+      <button id="previewBtn">Preview</button>
+      <button id="saveBtn">Save Draft</button>
+      <button id="publishBtn">Publish</button>
+    </div>
+  </header>
+
+  <main class="builder-layout">
+    <aside class="builder-sidebar">
+      <h2>Add Elements</h2>
+      <button data-add="hero">＋ Hero Banner</button>
+      <button data-add="text">＋ Text Section</button>
+      <button data-add="cards">＋ Information Cards</button>
+      <button data-add="image">＋ Image Section</button>
+
+      <hr>
+      <h2>Edit Selected Element</h2>
+
+      <label>Heading
+        <input id="editTitle" type="text">
+      </label>
+
+      <label>Text
+        <textarea id="editText" rows="5"></textarea>
+      </label>
+
+      <label>Background color
+        <input id="editColor" type="color" value="#e6f0f2">
+      </label>
+
+      <button id="deleteBtn">Delete Selected</button>
+    </aside>
+
+    <section class="builder-workspace">
+      <div id="status">Ready to edit</div>
+      <div id="canvas"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="builder.js"></script>
+</body>
+</html>
