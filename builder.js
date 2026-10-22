@@ -34,6 +34,39 @@ function render() {
     section.draggable = true;
     section.style.cursor = "grab";
     section.className = "builder-block";
+    section.addEventListener("dragstart", (event) => {
+  event.dataTransfer.setData("text/plain", String(index));
+  event.dataTransfer.effectAllowed = "move";
+});
+
+section.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+});
+
+section.addEventListener("drop", (event) => {
+  event.preventDefault();
+
+  const fromIndex = Number(
+    event.dataTransfer.getData("text/plain")
+  );
+  const toIndex = index;
+
+  if (
+    Number.isInteger(fromIndex) &&
+    fromIndex >= 0 &&
+    fromIndex < blocks.length &&
+    fromIndex !== toIndex
+  ) {
+    const [movedBlock] = blocks.splice(fromIndex, 1);
+    blocks.splice(toIndex, 0, movedBlock);
+
+    selected = toIndex;
+    render();
+    loadEditorFields();
+    setStatus("Section moved successfully.");
+  }
+});
 
     if (selected === index) {
       section.classList.add("selected");
