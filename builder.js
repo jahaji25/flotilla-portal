@@ -27,6 +27,40 @@ function setStatus(message) {
 }
 
 function render() {
+      const moveButtons = document.createElement("div");
+    moveButtons.style.display = "flex";
+    moveButtons.style.gap = "8px";
+    moveButtons.style.marginBottom = "10px";
+
+    const upButton = document.createElement("button");
+    upButton.textContent = "↑ উপরে";
+    upButton.disabled = index === 0;
+    upButton.onclick = (event) => {
+      event.stopPropagation();
+      if (index > 0) {
+        [blocks[index - 1], blocks[index]] =
+          [blocks[index], blocks[index - 1]];
+        selected = index - 1;
+        render();
+        loadEditorFields();
+      }
+    };
+
+    const downButton = document.createElement("button");
+    downButton.textContent = "↓ নিচে";
+    downButton.disabled = index === blocks.length - 1;
+    downButton.onclick = (event) => {
+      event.stopPropagation();
+      if (index < blocks.length - 1) {
+        [blocks[index + 1], blocks[index]] =
+          [blocks[index], blocks[index + 1]];
+        selected = index + 1;
+        render();
+        loadEditorFields();
+      }
+    };
+
+    moveButtons.append(upButton, downButton);
   canvas.innerHTML = "";
 
   blocks.forEach((block, index) => {
@@ -41,7 +75,7 @@ function render() {
     const paragraph = document.createElement("p");
     paragraph.textContent = block.text;
 
-    section.append(heading, paragraph);
+    section.append(moveButtons, heading, paragraph);
 
     section.addEventListener("click", () => {
       selected = index;
