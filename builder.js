@@ -31,6 +31,8 @@ function render() {
 
   blocks.forEach((block, index) => {
     const section = document.createElement("section");
+    section.draggable = true;
+    section.style.cursor = "grab";
     section.className = "builder-block";
 
     if (selected === index) {
