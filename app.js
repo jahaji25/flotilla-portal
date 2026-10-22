@@ -22,3 +22,49 @@ document.addEventListener("DOMContentLoaded",async()=>{
    try{const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);const {data,error}=await client.from("site_sections").select("title,slug,description,icon,sort_order").eq("published",true).order("sort_order");if(!error&&data?.length)renderCards(data);}catch(e){console.warn("Using demo content:",e.message);}
  }
 });
+
+async function loadPublishedBuilder() {
+  const cfg = window.SITE_CONFIG || {};
+
+  if (
+    !window.supabase ||
+    !cfg.supabaseUrl ||
+    !cfg.supabaseAnonKey
+  ) {
+    return;
+  }
+
+  try {
+    const client = window.supabase.createClient(
+      cfg.supabaseUrl,
+      cfg.supabaseAnonKey
+    );
+
+    const { data, error } = await client
+      .from("site_builder_published")
+      .select("html_content")
+      .eq("id", "homepage")
+      .maybeSingle();
+
+    if (error || !data?.html_content) return;
+
+    const saved = JSON.parse(data.html_content);
+    if (!Array.isArray(saved.blocks)) return;
+
+    const root = document.getElementById("sectionCards");
+    if (!root) return;
+
+    root.innerHTML = saved.blocks.map(block => `
+      <section class="builder-published-block"
+        style="background:${escapeHtml(block.color || "#ffffff")};
+        padding:24px;margin:16px 0;border-radius:10px;">
+        <h2>${escapeHtml(block.title || "")}</h2>
+        <p>${escapeHtml(block.text || "")}</p>
+      </section>
+    `).join("");
+  } catch (error) {
+    console.warn("Published builder content unavailable:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadPublishedBuilder);
