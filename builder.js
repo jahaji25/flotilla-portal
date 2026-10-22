@@ -27,7 +27,19 @@ function setStatus(message) {
 }
 
 function render() {
-      const moveButtons = document.createElement("div");
+  canvas.innerHTML = "";
+
+  blocks.forEach((block, index) => {
+    const section = document.createElement("section");
+    section.className = "builder-block";
+
+    if (selected === index) {
+      section.classList.add("selected");
+    }
+
+    section.style.background = block.color || "#ffffff";
+
+    const moveButtons = document.createElement("div");
     moveButtons.style.display = "flex";
     moveButtons.style.gap = "8px";
     moveButtons.style.marginBottom = "10px";
@@ -35,11 +47,14 @@ function render() {
     const upButton = document.createElement("button");
     upButton.textContent = "↑ উপরে";
     upButton.disabled = index === 0;
+
     upButton.onclick = (event) => {
       event.stopPropagation();
+
       if (index > 0) {
         [blocks[index - 1], blocks[index]] =
           [blocks[index], blocks[index - 1]];
+
         selected = index - 1;
         render();
         loadEditorFields();
@@ -49,11 +64,14 @@ function render() {
     const downButton = document.createElement("button");
     downButton.textContent = "↓ নিচে";
     downButton.disabled = index === blocks.length - 1;
+
     downButton.onclick = (event) => {
       event.stopPropagation();
+
       if (index < blocks.length - 1) {
         [blocks[index + 1], blocks[index]] =
           [blocks[index], blocks[index + 1]];
+
         selected = index + 1;
         render();
         loadEditorFields();
@@ -61,28 +79,19 @@ function render() {
     };
 
     moveButtons.append(upButton, downButton);
-  canvas.innerHTML = "";
-
-  blocks.forEach((block, index) => {
-    const section = document.createElement("section");
-    section.className = "builder-block";
-    if (selected === index) section.classList.add("selected");
-    section.style.background = block.color;
 
     const heading = document.createElement("h2");
-    heading.textContent = block.title;
+    heading.textContent = block.title || "";
 
     const paragraph = document.createElement("p");
-    paragraph.textContent = block.text;
+    paragraph.textContent = block.text || "";
 
     section.append(moveButtons, heading, paragraph);
 
     section.addEventListener("click", () => {
       selected = index;
-      document.getElementById("editTitle").value = block.title;
-      document.getElementById("editText").value = block.text;
-      document.getElementById("editColor").value = block.color;
       render();
+      loadEditorFields();
     });
 
     canvas.appendChild(section);
@@ -124,13 +133,18 @@ function makeBlock(type) {
 }
 
 function loadEditorFields() {
-  if (selected < 0) return;
+  if (selected < 0 || !blocks[selected]) return;
+
   document.getElementById("editTitle").value =
-    blocks[selected].title;
+    blocks[selected].title || "";
+
   document.getElementById("editText").value =
-    blocks[selected].text;
+    blocks[selected].text || "";
+
   document.getElementById("editColor").value =
-    blocks[selected].color;
+    /^#[0-9a-fA-F]{6}$/.test(blocks[selected].color || "")
+      ? blocks[selected].color
+      : "#ffffff";
 }
 
 document.querySelectorAll("[data-add]").forEach(button => {
@@ -140,46 +154,56 @@ document.querySelectorAll("[data-add]").forEach(button => {
 });
 
 document.getElementById("editTitle").addEventListener("input", event => {
-  if (selected < 0) return;
+  if (selected < 0 || !blocks[selected]) return;
   blocks[selected].title = event.target.value;
   render();
 });
 
 document.getElementById("editText").addEventListener("input", event => {
-  if (selected < 0) return;
+  if (selected < 0 || !blocks[selected]) return;
   blocks[selected].text = event.target.value;
   render();
 });
 
 document.getElementById("editColor").addEventListener("input", event => {
-  if (selected < 0) return;
+  if (selected < 0 || !blocks[selected]) return;
   blocks[selected].color = event.target.value;
   render();
 });
 
 document.getElementById("deleteBtn").addEventListener("click", () => {
   if (selected < 0) return;
+
   blocks.splice(selected, 1);
-  selected = -1;
+  selected = blocks.length ? Math.min(selected, blocks.length - 1) : -1;
+
   render();
+  loadEditorFields();
   setStatus("Element deleted.");
 });
 
 async function checkAdmin() {
-  const { data, error } = await db.auth.getUser();
+  try {
+    const { data, error } = await db.auth.getUser();
 
-  if (error || !data.user) {
-    setStatus("Please sign in through the Admin Panel first.");
+    if (error || !data.user) {
+      setStatus("Please sign in through the Admin Panel first.");
+      return false;
+    }
+
+    if (
+      data.user.email?.toLowerCase() !==
+      "sadeek1125.2@gmail.com"
+    ) {
+      setStatus("This account is not authorized to edit the site.");
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    setStatus("Could not verify login: " + error.message);
     return false;
   }
-
-  if (data.user.email?.toLowerCase() !==
-      "sadeek1125.2@gmail.com") {
-    setStatus("This account is not authorized to edit the site.");
-    return false;
-  }
-
-  return true;
 }
 
 async function saveContent(table) {
@@ -196,53 +220,68 @@ async function saveContent(table) {
     css_content: ""
   };
 
-  const { error } = await db
-    .from(table)
-    .upsert(payload, { onConflict: "id" });
+  try {
+    const { error } = await db
+      .from(table)
+      .upsert(payload, { onConflict: "id" });
 
-  if (error) {
+    if (error) {
+      setStatus("Save failed: " + error.message);
+      return;
+    }
+
+    setStatus(
+      table === "site_builder_drafts"
+        ? "Draft saved successfully."
+        : "Published content saved to Supabase."
+    );
+  } catch (error) {
     setStatus("Save failed: " + error.message);
-    return;
   }
-
-  setStatus(
-    table === "site_builder_drafts"
-      ? "Draft saved successfully."
-      : "Published content saved to Supabase."
-  );
 }
 
 async function loadDraft() {
-  if (!(await checkAdmin())) return;
+  setStatus("Checking admin login...");
 
-  setStatus("Loading saved draft...");
+  try {
+    if (!(await checkAdmin())) return;
 
-  const { data, error } = await db
-    .from("site_builder_drafts")
-    .select("html_content")
-    .eq("id", "homepage")
-    .maybeSingle();
+    setStatus("Loading saved draft...");
 
-  if (error) {
-    setStatus("Could not load draft: " + error.message);
-    blocks = defaults.map(block => ({ ...block }));
-  } else if (data?.html_content) {
-    try {
-      const saved = JSON.parse(data.html_content);
-      blocks = Array.isArray(saved.blocks)
-        ? saved.blocks
-        : defaults.map(block => ({ ...block }));
-    } catch {
+    const { data, error } = await db
+      .from("site_builder_drafts")
+      .select("html_content")
+      .eq("id", "homepage")
+      .maybeSingle();
+
+    if (error) {
+      setStatus("Could not load draft: " + error.message);
+      blocks = defaults.map(block => ({ ...block }));
+    } else if (data?.html_content) {
+      try {
+        const saved = JSON.parse(data.html_content);
+
+        blocks = Array.isArray(saved.blocks)
+          ? saved.blocks
+          : defaults.map(block => ({ ...block }));
+      } catch {
+        blocks = defaults.map(block => ({ ...block }));
+      }
+    } else {
       blocks = defaults.map(block => ({ ...block }));
     }
-  } else {
-    blocks = defaults.map(block => ({ ...block }));
-  }
 
-  selected = blocks.length ? 0 : -1;
-  render();
-  loadEditorFields();
-  setStatus("Ready to edit.");
+    selected = blocks.length ? 0 : -1;
+    render();
+    loadEditorFields();
+    setStatus("Ready to edit.");
+  } catch (error) {
+    blocks = defaults.map(block => ({ ...block }));
+    selected = 0;
+    render();
+    loadEditorFields();
+    setStatus("Loading failed: " + error.message);
+  }
 }
 
 document.getElementById("previewBtn").addEventListener("click", () => {
@@ -254,9 +293,9 @@ document.getElementById("previewBtn").addEventListener("click", () => {
   }
 
   const sections = blocks.map(block => `
-    <section style="padding:28px;margin:12px 0;background:${block.color}">
-      <h2>${escapeHTML(block.title)}</h2>
-      <p>${escapeHTML(block.text)}</p>
+    <section style="padding:28px;margin:12px 0;background:${escapeHTML(block.color || "#ffffff")};border-radius:10px">
+      <h2>${escapeHTML(block.title || "")}</h2>
+      <p>${escapeHTML(block.text || "")}</p>
     </section>
   `).join("");
 
@@ -267,9 +306,17 @@ document.getElementById("previewBtn").addEventListener("click", () => {
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <title>Website Preview</title>
         <style>
-          body{font-family:Arial,sans-serif;max-width:1000px;
-          margin:auto;padding:16px;color:#172a36}
-          p{line-height:1.7;white-space:pre-wrap}
+          body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: auto;
+            padding: 16px;
+            color: #172a36;
+          }
+          p {
+            line-height: 1.7;
+            white-space: pre-wrap;
+          }
         </style>
       </head>
       <body>${sections}</body>
